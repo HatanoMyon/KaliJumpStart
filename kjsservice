@@ -1,0 +1,16 @@
+#! /bin/sh
+
+### BEGIN INIT INFO
+# Provides:          kjsservice
+### END INIT INFO
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+
+
+case "$1" in
+    start)
+        ~/KaliJumpStart/kjs.sh
+        ;;
+    stop|restart|reload)
+        ;;
+esac
