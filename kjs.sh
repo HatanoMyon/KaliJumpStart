@@ -1,12 +1,16 @@
 #!/bin/bash
 
 debugstop() {
+	echo "-----"
 	echo $1
-	pause
+	read -p "Press Enter to continue..."
+	echo "-----"
 }
 
 part1(){
     
+	# get file permission set
+	chmod 755 ~/KaliJumpStart/kjsservice
 	#install kjsservice
 	cp ~/KaliJumpStart/kjsservice /etc/init.d/kjsservice
 	debugstop "Copied kjsservice to /etc/init.d/"
@@ -14,8 +18,8 @@ part1(){
 	#nano /etc/lightdm/lightdm.conf # and add these lines in [Seat:*] section
 	#autologin-user=root
 	#autologin-user-timeout=o
-	sed '/[Seat:*]/ aautologin-user-timeout=0' < /etc/lightdm/lightdm.conf
-	sed '/[Seat:*]/ aautologin-user=root' < /etc/lightdm/lightdm.conf
+	sed '/\[Seat\:\*\]/a autologin-user-timeout=0' < /etc/lightdm/lightdm.conf
+	sed '/\[Seat\:\*\]/a autologin-user=root' < /etc/lightdm/lightdm.conf
 	debugstop "Set autologin"
 
 	#nano /etc/pam.d/lightdm-autologin #Comment out below line
