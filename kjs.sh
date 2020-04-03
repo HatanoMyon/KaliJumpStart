@@ -25,6 +25,7 @@ debugstop "Installed VBox Additions"
 #get rid of screensaver bs
 xset s 0 0
 xset s off
+xset -dpms
 debugstop "Got rid of screensaver BS"
 
 #nano /etc/lightdm/lightdm.conf # and add these lines in [Seat:*] section
@@ -77,9 +78,13 @@ debugstop "Installed zsh"
 
 cp /root/KaliJumpStart/hatanomyon.zsh-theme /root/.oh-my-zsh/themes/
 sed 's,ZSH_THEME=[^;]*,ZSH_THEME=\"hatanomyon\",' -i ~/.zshrc
-. ~/.zshrc
+#. ~/.zshrc
+
+curl https://i.imgur.com/6cdsm1n.png > /root/bg.png
+
+
 debugstop "Installed personal theme"
 
-debugstop "Done!"
+debugstop "Done! Reboot for full effect."
 
 
