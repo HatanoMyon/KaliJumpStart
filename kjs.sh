@@ -50,6 +50,9 @@ if grep -Pq '^#auth      required pam_succeed_if.so user' /etc/pam.d/lightdm-aut
 apt update && apt -y upgrade
 debugstop "Did update and upgrade"
 
+apt -y autoremove
+debugstop "Did autoremove"
+
 #go home
 cd ~
 
