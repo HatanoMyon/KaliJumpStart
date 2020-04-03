@@ -75,7 +75,7 @@ chsh -s "$zsh"
 export SHELL="$zsh"
 debugstop "Installed zsh"
 
-cp ./KaliJumpStart/hatanomyon.zsh-theme ./.oh-my-zsh/themes/
+cp /root/KaliJumpStart/hatanomyon.zsh-theme /root/.oh-my-zsh/themes/
 sed 's,ZSH_THEME=[^;]*,ZSH_THEME=\"hatanomyon\",' -i ~/.zshrc
 . ~/.zshrc
 debugstop "Installed personal theme"
