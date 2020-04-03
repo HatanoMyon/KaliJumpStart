@@ -6,18 +6,11 @@ debugstop() {
 	read -p "Press Enter to continue..."
 	echo "-----"
 }
-
-part1(){
     
 	#get rid of screensaver bs
 	xset s 0 0
 	xset s off
-	
-	# get file permission set
-	chmod 755 ~/KaliJumpStart/kjsservice
-	#install kjsservice
-	cp ~/KaliJumpStart/kjsservice /etc/init.d/kjsservice
-	debugstop "Copied kjsservice to /etc/init.d/"
+	debugstop "Got rid of screensaver BS"
 	
 	#nano /etc/lightdm/lightdm.conf # and add these lines in [Seat:*] section
 	#autologin-user=root
@@ -39,14 +32,8 @@ part1(){
 		debugstop "Enabled root autologin"
         fi
 
-}
-
-part2(){
     apt update && apt -y upgrade
 	debugstop "Did update and upgrade"
-}
-
-part3(){
     
 	#go home
 	cd ~
@@ -75,22 +62,6 @@ part3(){
 	. ~/.zshrc
 	debugstop "Installed personal theme"
 	
-}
+	debugstop "Done!"
 
-if [ -f /var/run/parttwodone ]; then
-    part3
-    rm /var/run/partonedone
-    update-rc.d kjsservice remove
-    debugstop "All done"
-elif [ -f /var/run/partonedone ]; then
-    part2
-    rm /var/run/partonedone
-    touch /var/run/parttwodone
-    sudo reboot
-else
-    part1
-    touch /var/run/partonedone
-    update-rc.d kjsservice defaults
-    sudo reboot
-fi
 
