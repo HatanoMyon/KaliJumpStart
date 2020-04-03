@@ -9,7 +9,7 @@ PATH=/sbin:/bin:/usr/sbin:/usr/bin
 
 case "$1" in
     start)
-        ~/KaliJumpStart/kjs.sh
+        /root/KaliJumpStart/kjs.sh
         ;;
     stop|restart|reload)
         ;;

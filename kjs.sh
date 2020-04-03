@@ -17,16 +17,24 @@ part1(){
 	
 	#nano /etc/lightdm/lightdm.conf # and add these lines in [Seat:*] section
 	#autologin-user=root
-	#autologin-user-timeout=o
-	sed '/\[Seat\:\*\]/a autologin-user-timeout=0' < /etc/lightdm/lightdm.conf
-	sed '/\[Seat\:\*\]/a autologin-user=root' < /etc/lightdm/lightdm.conf
-	debugstop "Set autologin"
+	#autologin-user-timeout=0
+	if grep -Pq '^autologin' /etc/lightdm/lightdm.conf ; then
+		debugstop "Autologin already set, skipping..."
+	else
+		sed -i '/^\[Seat\:\*\]/a autologin-user-timeout=0' /etc/lightdm/lightdm.conf
+		sed -i '/^\[Seat\:\*\]/a autologin-user=root' /etc/lightdm/lightdm.conf
+		debugstop "Set autologin"
+	fi
 
 	#nano /etc/pam.d/lightdm-autologin #Comment out below line
-	#authrequired pam_succeed_if.so user != root quiet_success
-	sed -i '/authrequired pam_succeed_if.so user != root quiet_success/s/^/#/' /etc/pam.d/lightdm-autologin
-	debugstop "Enabled root autologin"
-	
+        #authrequired pam_succeed_if.so user != root quiet_success
+	if grep -Pq '^#auth      required pam_succeed_if.so user' /etc/pam.d/lightdm-autologin ; then
+                debugstop "Root autologin already set, skipping..."
+        else
+		sed -i '/auth      required pam_succeed_if.so user/s/^/#/' /etc/pam.d/lightdm-autologin
+		debugstop "Enabled root autologin"
+        fi
+
 }
 
 part2(){
@@ -69,7 +77,7 @@ if [ -f /var/run/parttwodone ]; then
     part3
     rm /var/run/partonedone
     update-rc.d kjsservice remove
-	debugstop "All done"
+    debugstop "All done"
 elif [ -f /var/run/partonedone ]; then
     part2
     rm /var/run/partonedone
