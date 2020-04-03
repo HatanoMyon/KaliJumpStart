@@ -9,6 +9,10 @@ debugstop() {
 
 part1(){
     
+	#get rid of screensaver bs
+	xset 0 0
+	xset s off
+	
 	# get file permission set
 	chmod 755 ~/KaliJumpStart/kjsservice
 	#install kjsservice
