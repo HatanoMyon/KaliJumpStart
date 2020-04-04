@@ -62,10 +62,47 @@ mkdir tools
 cd tools
 debugstop "Created tools dir"
 
+apt install libimage-exiftool-perl
+
 git clone https://github.com/danielmiessler/SecLists
+
 git clone https://github.com/henshin/filebuster
 cpan -T install YAML Furl Benchmark Net::DNS::Lite List::MoreUtils IO::Socket::SSL URI::Escape HTML::Entities IO::Socket::Socks::Wrapper URI::URL Cache::LRU IO::Async::Timer::Periodic
+
 git clone https://github.com/infodox/python-pty-shells
+
+git clone https://github.com/rebootuser/LinEnum
+
+git clone https://github.com/secforce/sparta.git
+apt install python-elixir python-pyside.qtwebkit nmap hydra cutycapt ldap-utils rwho rsh-client x11-apps finger
+cp sparta/sparta /usr/bin/
+
+git clone https://github.com/SecureAuthCorp/impacket
+cd impacket
+pip install .
+cd ..
+
+git clone https://github.com/ShawnDEvans/smbmap
+cd smbmap
+python3 -m pip install -r requirements.txt
+cd ..
+
+git clone https://github.com/drwetter/testssl.sh
+
+git clone https://github.com/Ekultek/WhatBreach
+cd WhatBreach
+pip install -r requirements.txt
+cd ..
+
+git clone https://github.com/jondonas/linux-exploit-suggester-2
+
+git clone https://github.com/Ekultek/WhatWaf
+
+git clone https://github.com/EnableSecurity/wafw00f
+cd wafw00f
+python setup.py install
+cd ..
+
 debugstop "Cloned all repos"
 
 
