@@ -1,12 +1,10 @@
-# mh theme
-# preview: https://cl.ly/1y2x0W0E3t2C0F29043z
+# based on mh theme
 
 # features:
 # path is autoshortened to ~30 characters
 # displays git status (if applicable in current folder)
-# turns username green if superuser, otherwise it is white
 
-# if superuser make the username green
+# if superuser make the username red
 if [ $UID -eq 0 ]; then NCOLOR="red"; else NCOLOR="white"; fi
 
 # prompt
