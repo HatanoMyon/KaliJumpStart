@@ -13,15 +13,6 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-#get other stuff done first
-debugstop "Insert VBox Additions cd please..."
-cp -r /media/cdrom0/ ~/vboxadditions/
-chmod +x ~/vboxadditions/VBoxLinuxAdditions.run
-~/vboxadditions/VBoxLinuxAdditions.run
-rm -rf ~/vboxadditions
-
-debugstop "Installed VBox Additions"
-	
 #get rid of screensaver bs
 xset s 0 0
 xset s off
@@ -105,7 +96,6 @@ cd ..
 
 debugstop "Cloned all repos"
 
-
 #Install zsh and ohmyzsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" "" --unattended
 zsh=$(which zsh)
@@ -119,9 +109,6 @@ sed 's,ZSH_THEME=[^;]*,ZSH_THEME=\"hatanomyon\",' -i ~/.zshrc
 
 curl https://i.imgur.com/6cdsm1n.png > /root/bg.png
 
-
 debugstop "Installed personal theme"
 
 debugstop "Done! Reboot for full effect."
-
-
