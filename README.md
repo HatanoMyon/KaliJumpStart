@@ -1,15 +1,12 @@
 # KaliJumpStart
 Personal kali linux jump start script to prepare a fresh installation for pentest work
 
-Remember to set on VBox Display-> Screen-> Graphics Controller: VBoxVGA
-
 ## Instructions:
 
-1. sudo su
-2. cd ~
-3. git clone ht<span>tps://</span>github.com/HatanoMyon/KaliJumpStart (manual type)
-4. cd KaliJumpStart
-5. ./kjs.sh
-6. Follow prompts
-7. Reboot
-8. Profit!
+1. git clone https://github.com/HatanoMyon/KaliJumpStart (manual type)
+2. cd KaliJumpStart
+3. chmod +x ./kjs.sh
+4. ./kjs.sh
+5. Follow prompts
+6. Reboot
+7. Profit!
