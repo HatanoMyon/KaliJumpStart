@@ -13,11 +13,16 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-#get rid of screensaver bs
+#get rid of screensaver and power manager bs
 xset s 0 0
 xset s off
 xset -dpms
-debugstop "Got rid of screensaver BS"
+xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/power-button-action -s 3
+xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/dpms-enabled -s false
+xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/blank-on-ac -s 0
+xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/lock-screen-suspend-hibernate -s false
+xfconf-query -c xfce4-session -p /shutdown/LockScreen -s false
+debugstop "Got rid of screensaver and power manager BS"
 
 #nano /etc/lightdm/lightdm.conf # and add these lines in [Seat:*] section
 #autologin-user=root
@@ -26,18 +31,18 @@ if grep -Pq '^autologin' /etc/lightdm/lightdm.conf ; then
 	debugstop "Autologin already set, skipping..."
 else
 	sed -i '/^\[Seat\:\*\]/a autologin-user-timeout=0' /etc/lightdm/lightdm.conf
-	sed -i '/^\[Seat\:\*\]/a autologin-user=root' /etc/lightdm/lightdm.conf
+	sed -i "/^\[Seat\:\*\]/a autologin-user=$USER" /etc/lightdm/lightdm.conf
 	debugstop "Set autologin"
 fi
 
 #nano /etc/pam.d/lightdm-autologin #Comment out below line
 	#authrequired pam_succeed_if.so user != root quiet_success
-if grep -Pq '^#auth      required pam_succeed_if.so user' /etc/pam.d/lightdm-autologin ; then
-			debugstop "Root autologin already set, skipping..."
-	else
-	sed -i '/auth      required pam_succeed_if.so user/s/^/#/' /etc/pam.d/lightdm-autologin
-	debugstop "Enabled root autologin"
-	fi
+#if grep -Pq '^#auth      required pam_succeed_if.so user' /etc/pam.d/lightdm-autologin ; then
+#			debugstop "Root autologin already set, skipping..."
+#	else
+#	sed -i '/auth      required pam_succeed_if.so user/s/^/#/' /etc/pam.d/lightdm-autologin
+#	debugstop "Enabled root autologin"
+#	fi
 
 apt update && apt -y upgrade
 debugstop "Did update and upgrade"
