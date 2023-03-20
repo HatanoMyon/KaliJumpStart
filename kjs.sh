@@ -31,7 +31,7 @@ rootautologin(){
 	#autologin-user=root
 	#autologin-user-timeout=0
 	if grep -Pq '^autologin' /etc/lightdm/lightdm.conf ; then
-		debugstop "Root Autologin already set, skipping..."
+		debugstop "Root autologin already set, skipping..."
 	else
 		sed -i '/^\[Seat\:\*\]/a autologin-user-timeout=0' /etc/lightdm/lightdm.conf
 		sed -i "/^\[Seat\:\*\]/a autologin-user=root" /etc/lightdm/lightdm.conf
@@ -41,7 +41,7 @@ rootautologin(){
 	#nano /etc/pam.d/lightdm-autologin #Comment out below line
 		#authrequired pam_succeed_if.so user != root quiet_success
 	if grep -Pq '^#auth      required pam_succeed_if.so user' /etc/pam.d/lightdm-autologin ; then
-		debugstop "Root autologin already set, skipping..."
+		debugstop "Root autologin (pam step) already set, skipping..."
 	else
 		sed -i '/auth      required pam_succeed_if.so user/s/^/#/' /etc/pam.d/lightdm-autologin
 		debugstop "Enabled root autologin"
