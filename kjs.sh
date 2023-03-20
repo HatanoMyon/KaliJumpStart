@@ -116,7 +116,49 @@ bg(){
 	debugstop "Installed bg"
 }
 
+toolsonly(){
+	toolinstall
+}
 
-debugstop "Installed personal theme"
+configsonly(){
+	screenandpower
+	rootautologin
+	upgradeautoremove
+	#toolinstall
+	#zshtheme1
+	bg
+	debugstop "Done! Reboot for full effect."
+}
 
-debugstop "Done! Reboot for full effect."
+fullinstall(){
+	screenandpower
+	rootautologin
+	upgradeautoremove
+	toolinstall
+	#zshtheme1
+	bg
+	debugstop "Done! Reboot for full effect."
+}
+
+mainf(){
+	title="KaliJumpStarter"
+	prompt="Pick an option:"
+	options=("Full" "Configs only" "Tools only")
+
+	echo "$title"
+	PS3="$prompt "
+	select opt in "${options[@]}" "Quit"; do 
+	    case "$REPLY" in
+	    1) echo "You picked $opt which is option 1"
+	    fullinstall;;
+	    2) echo "You picked $opt which is option 2"
+	    configsonly;;
+	    3) echo "You picked $opt which is option 3"
+	    toolsonly;;
+	    $((${#options[@]}+1))) echo "Goodbye!"; break;;
+	    *) echo "Invalid option. Try another one.";continue;;
+	    esac
+	done
+}
+
+mainf
