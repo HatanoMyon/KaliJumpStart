@@ -19,7 +19,7 @@ screenandpower(){
 	xset s off
 	xset -dpms
 	xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/power-button-action -s 3
-	fconf-query -c xfce4-power-manager -p /xfce4-power-manager/dpms-enabled -s false --create -t bool # disable display power management
+	xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/dpms-enabled -s false --create -t bool # disable display power management
 	xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/blank-on-ac -s 0 --create -t int # never shutdown screen
 	xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/lock-screen-suspend-hibernate -s false --create -t bool # don't lock screen when going to sleep
 	xfconf-query -c xfce4-session -p /shutdown/LockScreen -s false
