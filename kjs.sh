@@ -112,7 +112,7 @@ zshtheme1(){
 
 bg(){
 	curl https://i.imgur.com/6cdsm1n.png > ~/bg.png
-	xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -s ~/bg.png
+	xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitorVirtual1/workspace0/last-image -s ~/bg.png
 	debugstop "Installed bg"
 }
 
