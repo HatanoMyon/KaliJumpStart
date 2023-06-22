@@ -3,7 +3,7 @@
 debugstop() {
 	echo "-----"
 	echo $1
-	read -p "Press Enter to continue..."
+	#read -p "Press Enter to continue..."
 	echo "-----"
 }
 
@@ -27,6 +27,8 @@ screenandpower(){
 }
 
 rootautologin(){
+	#intended for vm use
+	
 	#nano /etc/lightdm/lightdm.conf # and add these lines in [Seat:*] section
 	#autologin-user=root
 	#autologin-user-timeout=0
@@ -39,7 +41,7 @@ rootautologin(){
 	fi
 
 	#nano /etc/pam.d/lightdm-autologin #Comment out below line
-		#authrequired pam_succeed_if.so user != root quiet_success
+	#authrequired pam_succeed_if.so user != root quiet_success
 	if grep -Pq '^#auth      required pam_succeed_if.so user' /etc/pam.d/lightdm-autologin ; then
 		debugstop "Root autologin (pam step) already set, skipping..."
 	else
@@ -54,6 +56,14 @@ upgradeautoremove(){
 
 	apt -y autoremove
 	debugstop "Did autoremove"
+}
+
+additionalaptpackages(){
+	# debsums - check the MD5 sums of installed Debian packages
+	# apt-listbugs - Lists critical bugs before each APT installation/upgrade
+	# apt-listchanges - Show new changelog entries from Debian package archives
+	# needrestart checks which daemons need to be restarted after library upgrades
+	sudo apt install debsums apt-listbugs apt-listchanges needrestart
 }
 
 toolinstall(){
@@ -96,7 +106,7 @@ toolinstall(){
 	debugstop "Cloned all repos"
 }
 
-zshtheme1(){
+shellandfiles(){
 	#Install zsh and ohmyzsh
 	sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" "" --unattended
 	zsh=$(which zsh)
@@ -104,10 +114,16 @@ zshtheme1(){
 	export SHELL="$zsh"
 	debugstop "Installed zsh"
 
-	cp /root/KaliJumpStart/hatanomyon.zsh-theme /root/.oh-my-zsh/themes/
+	cp hatanomyon.zsh-theme /root/.oh-my-zsh/themes/
 	sed 's,ZSH_THEME=[^;]*,ZSH_THEME=\"hatanomyon\",' -i ~/.zshrc
 	#. ~/.zshrc
 	debugstop "Installed personal theme"
+	
+	#also remove transparency from terminal
+	sed 's,ApplicationTransparency=.*$,ApplicationTransparency=0,' -i /root/.config/qterminal.org/qterminal.ini
+	
+	#show hidden files
+	xfconf-query -c thunar -p /last-show-hidden -s true --create -t bool
 }
 
 bg(){
@@ -124,19 +140,14 @@ configsonly(){
 	screenandpower
 	rootautologin
 	upgradeautoremove
-	#toolinstall
-	#zshtheme1
+	additionalaptpackages
+	shellandfiles
 	bg
-	debugstop "Done! Reboot for full effect."
 }
 
 fullinstall(){
-	screenandpower
-	rootautologin
-	upgradeautoremove
+	configsonly
 	toolinstall
-	#zshtheme1
-	bg
 	debugstop "Done! Reboot for full effect."
 }
 
@@ -149,12 +160,15 @@ mainf(){
 	PS3="$prompt "
 	select opt in "${options[@]}" "Quit"; do 
 	    case "$REPLY" in
-	    1) echo "You picked $opt which is option 1"
-	    fullinstall;;
-	    2) echo "You picked $opt which is option 2"
-	    configsonly;;
-	    3) echo "You picked $opt which is option 3"
-	    toolsonly;;
+	    1) echo "You picked $opt"
+	    fullinstall
+	    break;;
+	    2) echo "You picked $opt"
+	    configsonly
+            break;;
+	    3) echo "You picked $opt"
+	    toolsonly
+            break;;
 	    $((${#options[@]}+1))) echo "Goodbye!"; break;;
 	    *) echo "Invalid option. Try another one.";continue;;
 	    esac
