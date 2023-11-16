@@ -109,8 +109,11 @@ shellandfiles(){
 	#also remove transparency from terminal
 	#sed 's,ApplicationTransparency=.*$,ApplicationTransparency=0,' -i /root/.config/qterminal.org/qterminal.ini
 	
-	#install alacritty
+	#install alacritty and replace terminal launcher
 	apt install alacritty
+	cp /root/KaliJumpStart/Alacritty.desktop /root/.config/xfce4/panel/launcher-7
+	mv /root/.config/xfce4/panel/launcher-7/1* /tmp/launchertmp
+	cp /tmp/launchertmp/* /root/.config/xfce4/panel/launcher-7
 	
 	#show hidden files
 	xfconf-query -c thunar -p /last-show-hidden -s true --create -t bool
@@ -234,7 +237,7 @@ mainf(){
 	select opt in "${options[@]}" "Quit"; do 
 	    case "$REPLY" in
 	    1) echo "You picked $opt"
-	    rm -rf /root/KaliJumpStart
+	    rm -rf /root/KaliJumpStart/
 		echo "Goodbye!"
 	    break;;
 	    2) echo "Goodbye!"
