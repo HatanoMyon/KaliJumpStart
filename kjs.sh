@@ -83,12 +83,20 @@ toolinstall(){
 	cd WhatBreach
 	pip install -r requirements.txt
 	ln -s "$(pwd)/whatbreach.py" "/usr/bin/whatbreach"
-	cd ..
+	cd /root/tools
 
 	git clone https://github.com/EnableSecurity/wafw00f
 	cd wafw00f
 	python setup.py install
-	cd ..
+	cd /root/tools
+	
+	go install -v github.com/projectdiscovery/pdtm/cmd/pdtm@latest
+	pdtm -install-all
+
+	cd /usr/share/nmap/scripts/
+	sudo wget https://raw.githubusercontent.com/vulnersCom/nmap-vulners/master/vulners.nse
+	sudo wget https://raw.githubusercontent.com/vulnersCom/nmap-vulners/master/http-vulners-regex.nse
+	cd /root/tools
 
 	debugstop "Cloned all repos"
 }
