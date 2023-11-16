@@ -111,8 +111,10 @@ shellandfiles(){
 	
 	#install alacritty and replace terminal launcher
 	apt install alacritty
-	cp /root/KaliJumpStart/Alacritty.desktop /root/.config/xfce4/panel/launcher-7
+	cp /root/KaliJumpStart/Alacritty.desktop /root/.config/xfce4/panel/launcher-7/
+	mkdir /tmp/launchertmp
 	mv /root/.config/xfce4/panel/launcher-7/1* /tmp/launchertmp
+	sleep 3 # let xfce update panel
 	cp /tmp/launchertmp/* /root/.config/xfce4/panel/launcher-7
 	
 	#show hidden files
@@ -120,7 +122,7 @@ shellandfiles(){
 }
 
 zshrcadditions(){
-cat <<eos >> /root/.zshrc
+cat >> /root/.zshrc << 'eos' # single quotes prevent the need to escape anything
 
 alias wanip4='dig @resolver4.opendns.com myip.opendns.com +short -4'
 
@@ -167,12 +169,12 @@ logging_script(){
 		printf '  \\\\-> '$rawfile''
 	}
 
-	# Run script at terminal initialization
-	logging_script
+# Run script at terminal initialization
+logging_script
 
-	# print banner
-	print -P "%F{045}%}Session being logged!%{$reset_color%}"
-	print -P "%F{045}%}External IP: $(wanip4)%{$reset_color%}"
+# print banner
+print -P "%F{045}%}Session being logged!%{$reset_color%}"
+print -P "%F{045}%}External IP: $(wanip4)%{$reset_color%}"
 
 eos
 }
