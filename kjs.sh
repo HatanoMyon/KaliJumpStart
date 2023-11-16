@@ -55,10 +55,8 @@ rootautologin(){
 }
 
 upgradeautoremove(){
-	apt update && apt -y upgrade
+	apt update --fix-missing && apt full-upgrade -y && apt autoremove -y 
 	debugstop "Did update and upgrade"
-
-	apt -y autoremove
 	debugstop "Did autoremove"
 }
 
