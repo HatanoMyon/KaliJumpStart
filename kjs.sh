@@ -15,7 +15,7 @@ fi
 
 pimpmykali(){
 	git clone https://github.com/Dewalt-arch/pimpmykali
-	./pimpmykali/pimpmykali.sh
+	/root/pimpmykali/pimpmykali.sh
 	rm -rf pimpmykali
 	rm -rf pimpmykali.log
 }
@@ -72,7 +72,7 @@ additionalaptpackages(){
 
 toolinstall(){
 	#go home
-	cd ~
+	cd /root
 
 	#Tools dir
 	mkdir tools
@@ -103,73 +103,54 @@ shellandfiles(){
 	export SHELL="$zsh"
 	debugstop "Installed oh my zsh"
 
-	cp hatanomyon.zsh-theme /root/.oh-my-zsh/themes/
+	cp /root/KaliJumpStart/hatanomyon.zsh-theme /root/.oh-my-zsh/themes/
 	sed 's,ZSH_THEME=[^;]*,ZSH_THEME=\"hatanomyon\",' -i ~/.zshrc
 	#. ~/.zshrc
 	debugstop "Installed personal shell theme"
 	
 	#also remove transparency from terminal
-	sed 's,ApplicationTransparency=.*$,ApplicationTransparency=0,' -i /root/.config/qterminal.org/qterminal.ini
+	#sed 's,ApplicationTransparency=.*$,ApplicationTransparency=0,' -i /root/.config/qterminal.org/qterminal.ini
+	
+	#install alacritty
+	apt install alacritty
 	
 	#show hidden files
 	xfconf-query -c thunar -p /last-show-hidden -s true --create -t bool
 }
 
 zshrcadditions(){
-	cat <<eos >> .zshrc
+cat <<eos >> /root/.zshrc
 
-	alias wanip4='dig @resolver4.opendns.com myip.opendns.com +short -4'
+alias wanip4='dig @resolver4.opendns.com myip.opendns.com +short -4'
 
-	# smart_script will continuously log the input and output of the terminal into a logfile located in ~/terminal_logs
-	# Original credit to HuskyHacks
+# smart_script will continuously log the input and output of the terminal into a logfile located in ~/terminal_logs
+# Original credit to HuskyHacks
 
-	logging_script(){
-		# if there's no SCRIPT_LOG_FILE exported yet
-		if [ -z "$SCRIPT_LOG_FILE" ]; then
-			# make folder paths
-			logdirparent=~/terminal_logs
-			logdirraw=raw/$(date +%F)
-			logdir=$logdirparent/$logdirraw
-			logfile=$logdir/$(date +%F_%T).$$.rawlog
-			txtfile=$logdir/$(date +%F_%T).$$.txt
-			
-			# if no folder exist - make one
-			if [ ! -d $logdir ]; then
-				mkdir -p $logdir
-			fi
-			export SCRIPT_LOG_FILE=$logfile
-			export SCRIPT_LOG_PARENT_FOLDER=$logdirparent
-			export TXTFILE=$txtfile
-			
-			# quiet output if no args are passed
-			if [ ! -z "$1" ]; then
-				script -f $logfile
-				cat $logfile | perl -pe 's/\\e([^\\[\\]]|\\[.*?[a-zA-Z]|\\].*?\\a)//g' | col -b > $txtfile
-			else
-				script -f -q $logfile
-				cat $logfile | perl -pe 's/\\e([^\\[\\]]|\\[.*?[a-zA-Z]|\\].*?\\a)//g' | col -b > $txtfile
-			fi
-			exit
+logging_script(){
+	# if there's no SCRIPT_LOG_FILE exported yet
+	if [ -z "$SCRIPT_LOG_FILE" ]; then
+		# make folder paths
+		logdirparent=~/terminal_logs
+		logdirraw=raw/$(date +%F)
+		logdir=$logdirparent/$logdirraw
+		logfile=$logdir/$(date +%F_%T).$$.rawlog
+		txtfile=$logdir/$(date +%F_%T).$$.txt
+		
+		# if no folder exist - make one
+		if [ ! -d $logdir ]; then
+			mkdir -p $logdir
 		fi
-	}
-	# Start logging into new file
-	alias startnewlog='unset SCRIPT_LOG_FILE && smart_script -v'
-
-	# savelog manually saves the current terminal in/out into a logfile: 
-	# Example: $ savelog logname
-	savelog(){
-		# make folder path
-		manualdir=$SCRIPT_LOG_PARENT_FOLDER/manual
-		# if no folder exists - make one
-		if [ ! -d $manualdir ]; then
-			mkdir -p $manualdir
-		fi
-		# make log name
-		logname=${SCRIPT_LOG_FILE##*/}
-		logname=${logname%.*}
-		# add user logname if passed as argument
-		if [ ! -z $1 ]; then
-			logname=$logname'_'$1
+		export SCRIPT_LOG_FILE=$logfile
+		export SCRIPT_LOG_PARENT_FOLDER=$logdirparent
+		export TXTFILE=$txtfile
+		
+		# quiet output if no args are passed
+		if [ ! -z "$1" ]; then
+			script -f $logfile
+			cat $logfile | perl -pe 's/\\e([^\\[\\]]|\\[.*?[a-zA-Z]|\\].*?\\a)//g' | col -b > $txtfile
+		else
+			script -f -q $logfile
+			cat $logfile | perl -pe 's/\\e([^\\[\\]]|\\[.*?[a-zA-Z]|\\].*?\\a)//g' | col -b > $txtfile
 		fi
 		# make filepaths
 		txtfile=$manualdir/$logname'.txt'
@@ -223,10 +204,12 @@ fullinstall(){
 }
 
 mainf(){
+	cd /root
+	
 	title="KaliJumpStarter"
 	prompt="Pick an option:"
 	options=("Full" "Configs only" "Tools only")
-
+	
 	echo "$title"
 	PS3="$prompt "
 	select opt in "${options[@]}" "Quit"; do 
@@ -239,6 +222,24 @@ mainf(){
             break;;
 	    3) echo "You picked $opt"
 	    toolsonly
+            break;;
+	    $((${#options[@]}+1))) echo "Goodbye!"; break;;
+	    *) echo "Invalid option. Try another one.";continue;;
+	    esac
+	done
+	
+	prompt="Delete KJS:"
+	options=("Yes" "No")
+
+	echo "$title"
+	PS3="$prompt "
+	select opt in "${options[@]}" "Quit"; do 
+	    case "$REPLY" in
+	    1) echo "You picked $opt"
+	    rm -rf /root/KaliJumpStart
+		echo "Goodbye!"
+	    break;;
+	    2) echo "Goodbye!"
             break;;
 	    $((${#options[@]}+1))) echo "Goodbye!"; break;;
 	    *) echo "Invalid option. Try another one.";continue;;
