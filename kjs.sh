@@ -109,6 +109,7 @@ shellandfiles(){
 	export SHELL="$zsh"
 	debugstop "Installed oh my zsh"
 
+	#install my theme
 	cp /root/KaliJumpStart/hatanomyon.zsh-theme /root/.oh-my-zsh/themes/
 	sed 's,ZSH_THEME=[^;]*,ZSH_THEME=\"hatanomyon\",' -i ~/.zshrc
 	#. ~/.zshrc
@@ -116,14 +117,6 @@ shellandfiles(){
 	
 	#also remove transparency from terminal
 	#sed 's,ApplicationTransparency=.*$,ApplicationTransparency=0,' -i /root/.config/qterminal.org/qterminal.ini
-	
-	#install alacritty and replace terminal launcher
-	apt install alacritty
-	cp /root/KaliJumpStart/Alacritty.desktop /root/.config/xfce4/panel/launcher-7/
-	mkdir /tmp/launchertmp
-	mv /root/.config/xfce4/panel/launcher-7/1* /tmp/launchertmp
-	sleep 3 # let xfce update panel
-	cp /tmp/launchertmp/* /root/.config/xfce4/panel/launcher-7
 	
 	#show hidden files
 	xfconf-query -c thunar -p /last-show-hidden -s true --create -t bool
