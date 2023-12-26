@@ -197,7 +197,7 @@ logging_script
 
 # print banner
 print -P "%F{045}%}Session being logged!%{$reset_color%}"
-print -P "%F{045}%}External IP: $(wanip4)%{$reset_color%}"olor%}"
+print -P "%F{045}%}External IP: $(wanip4)%{$reset_color%}"
 
 eos
 }
