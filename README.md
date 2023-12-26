@@ -5,9 +5,11 @@ Intended for use in VM.
 ## Instructions:
 
 1. sudo su
-2. cd ~
-3. git clone https://github.com/HatanoMyon/KaliJumpStart
-4. ./KaliJumpStart/kjs.sh
-5. Follow prompts (use N for pimpmykali options)
-6. Reboot
-7. Profit!
+2. passwd
+3. login as root
+4. cd ~
+5. git clone https://github.com/HatanoMyon/KaliJumpStart
+6. cd KaliJumpStart; ./kjs.sh
+7. Follow prompts (use N for pimpmykali options)
+8. Reboot
+9. Profit!
