@@ -193,7 +193,7 @@ savelog(){
 }
 
 alias settgt='nano /etc/hosts'
-alias setlip="lip=$(ip -f inet addr show tun0 | sed -En -e 's/.*inet ([0-9.]+).*/\1/p')"
+setlip() { lipif=${1:-eth0}; lip=$(ip -f inet addr show $lipif | sed -En -e 's/.*inet ([0-9.]+).*/\1/p'); echo "lip set to $lip";}
 
 
 # Run script at terminal initialization
