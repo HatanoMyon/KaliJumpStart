@@ -193,12 +193,14 @@ savelog(){
 }
 
 alias settgt='nano /etc/hosts'
+alias setlip="lip=$(ip -f inet addr show tun0 | sed -En -e 's/.*inet ([0-9.]+).*/\1/p')"
+
 
 # Run script at terminal initialization
 logging_script
 
 # print banner
-print -P "%F{045}%}Available custom cmdlets: startnewlog, wanip4, settgt%{$reset_color%}"
+print -P "%F{045}%}Available custom cmdlets: startnewlog, wanip4, settgt, setlip%{$reset_color%}"
 print -P "%F{045}%}Session being logged!%{$reset_color%}"
 print -P "%F{045}%}External IP: $(wanip4)%{$reset_color%}"
 
