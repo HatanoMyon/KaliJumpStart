@@ -96,7 +96,8 @@ setlip() { lipif=${1:-eth0}; lip=$(ip -f inet addr show $lipif | sed -En -e 's/.
 cd ~/Desktop
 
 # print banner
-echo "Available custom cmdlets: wanip4, settgt, setlip"
+echo "Available cmdlets: wanip4, settgt, setlip"
+echo "Custom alias: enumerate"
 echo "External IP: $(wanip4)"
 eos
 echo "Added extras to bash"
@@ -109,6 +110,6 @@ echo "Set power options"
 
 # Install background image
 curl https://i.imgur.com/6cdsm1n.png --output ~/bg.png
-xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitorVirtual1/workspace0/last-image -s ~/bg.png
+xfconf-query -c xfce4-desktop -n -t string -p /backdrop/screen0/monitorVirtual1/workspace0/last-image -s ~/bg.png
 echo "Installed bg"
 
