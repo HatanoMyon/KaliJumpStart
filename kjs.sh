@@ -1,281 +1,114 @@
 #!/bin/bash
 
-debugstop() {
-	echo "-----"
-	echo $1
-	read -p "Press Enter to continue..."
-	echo "-----"
-}
 
-#are you even qualified to do this?
-if [[ $EUID -ne 0 ]]; then
-   echo "This script must be run as root" 
+# Check if sudo
+if [[ $UID -ne 0 ]]; then
+   echo "This script must be run from root account"
    exit 1
 fi
 
-pimpmykali(){
-	git clone https://github.com/Dewalt-arch/pimpmykali
-	/root/pimpmykali/pimpmykali.sh
-	rm -rf pimpmykali
-	rm -rf pimpmykali.log
-}
 
-screenandpower(){
-	#get rid of screensaver and power manager bs
-	xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/power-button-action -s 3
-	xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/dpms-enabled -s false --create -t bool # disable display power management
-	xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/blank-on-ac -s 0 --create -t int # never shutdown screen
-	xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/lock-screen-suspend-hibernate -s false --create -t bool # don't lock screen when going to sleep
-	xfconf-query -c xfce4-session -p /shutdown/LockScreen -s false
-	debugstop "Got rid of screensaver and power manager BS"
-}
+# Update and upgrade, then install extra packages
+apt update --fix-missing && apt upgrade -y && apt autoremove -y
+echo "Installed upgrades"
 
-rootautologin(){
-	#intended for vm use
-	
-	#nano /etc/lightdm/lightdm.conf # and add these lines in [Seat:*] section
-	#autologin-user=root
-	#autologin-user-timeout=0
-	if grep -Pq '^autologin' /etc/lightdm/lightdm.conf ; then
-		debugstop "Root autologin already set, skipping..."
-	else
-		sed -i '/^\[Seat\:\*\]/a autologin-user-timeout=0' /etc/lightdm/lightdm.conf
-		sed -i "/^\[Seat\:\*\]/a autologin-user=root" /etc/lightdm/lightdm.conf
-		debugstop "Set autologin"
-	fi
+apt install debsums apt-listbugs apt-listchanges needrestart -y
+echo "Installed apt improvements"
 
-	#nano /etc/pam.d/lightdm-autologin #Comment out below line
-	#authrequired pam_succeed_if.so user != root quiet_success
-	if grep -Pq '^#auth      required pam_succeed_if.so user' /etc/pam.d/lightdm-autologin ; then
-		debugstop "Root autologin (pam step) already set, skipping..."
-	else
-		sed -i '/auth      required pam_succeed_if.so user/s/^/#/' /etc/pam.d/lightdm-autologin
-		debugstop "Enabled root autologin"
-	fi
-}
+apt install golang-go peass powercat windows-privesc-check  -y
+echo "Installed extra repos"
 
-upgradeautoremove(){
-	apt update --fix-missing && apt full-upgrade -y && apt autoremove -y 
-	debugstop "Did update and upgrade"
-	debugstop "Did autoremove"
-}
+# Change shell to bash
+chsh -s /usr/bin/bash
+echo "Changed shell to bash"
 
-additionalaptpackages(){
-	# debsums - check the MD5 sums of installed Debian packages
-	# apt-listbugs - Lists critical bugs before each APT installation/upgrade
-	# apt-listchanges - Show new changelog entries from Debian package archives
-	# needrestart checks which daemons need to be restarted after library upgrades
-	sudo apt install debsums apt-listbugs apt-listchanges needrestart
-}
 
-toolinstall(){
-	#go home
-	cd /root
+# Set autologin for the root user, intended for vm use
+#nano /etc/lightdm/lightdm.conf # and add these lines in [Seat:*] section
+if grep -Pq '^autologin' /etc/lightdm/lightdm.conf ; then
+	echo "Root autologin already set, skipping..."
+else
+	sed -i '/^\[Seat\:\*\]/a autologin-user-timeout=0' /etc/lightdm/lightdm.conf
+	sed -i "/^\[Seat\:\*\]/a autologin-user=root" /etc/lightdm/lightdm.conf
+	echo "Set autologin"
+fi
 
-	#Tools dir
-	mkdir tools
-	cd tools
-	debugstop "Created tools dir"
+# Enable root autologin
+#nano /etc/pam.d/lightdm-autologin #Comment out below line
+#authrequired pam_succeed_if.so user != root quiet_success
+if grep -Pq '^#auth      required pam_succeed_if.so user' /etc/pam.d/lightdm-autologin ; then
+	echo "Root autologin (pam step) already set, skipping..."
+else
+	sed -i '/auth      required pam_succeed_if.so user/s/^/#/' /etc/pam.d/lightdm-autologin
+	echo "Enabled root autologin"
+fi
+echo "Enabled root autologin"
 
-	git clone https://github.com/rebootuser/LinEnum
+# Show hidden files in thunar file explorer
+xfconf-query -c thunar -p /last-show-hidden -s true --create -t bool
+echo "Set hidden files to be shown"
 
-	git clone https://github.com/Ekultek/WhatBreach
-	cd WhatBreach
-	pip install -r requirements.txt
-	ln -s "$(pwd)/whatbreach.py" "/usr/bin/whatbreach"
-	cd /root/tools
+# Install PDTM
+go install -v github.com/projectdiscovery/pdtm/cmd/pdtm@latest
+pdtm -install-all
+echo "Installed PDTM"
 
-	git clone https://github.com/EnableSecurity/wafw00f
-	cd wafw00f
-	python setup.py install
-	cd /root/tools
-	
-	go install -v github.com/projectdiscovery/pdtm/cmd/pdtm@latest
-	pdtm -install-all
 
-	cd /usr/share/nmap/scripts/
-	sudo wget https://raw.githubusercontent.com/vulnersCom/nmap-vulners/master/vulners.nse
-	sudo wget https://raw.githubusercontent.com/vulnersCom/nmap-vulners/master/http-vulners-regex.nse
-	cd /root/tools
+# Create net interface monitor script
+cat > /root/ipmon_genmon.sh << 'eox'
+#!/bin/bash
+# ipmon_genmon.sh - IP monitor script intended for use with xfce4 generic monitor plugin
+interface_ips=$(ip -4 -br addr | awk 'NR>1 {printf "%s ", $1": "$3;} END {print ""}')
+external="ext: $(dig @resolver4.opendns.com myip.opendns.com +short -4)"
+echo "$interface_ips $external"
+eox
+chmod +x /root/ipmon_genmon.sh
+echo "Installed ip monitor script"
 
-	debugstop "Cloned all repos"
-}
+# Create enumeration script
+cat > /root/enumerate.sh << 'eox'
+#!/bin/bash
+# Auto Enumerate
+tip=tip
+nmap $tip -T4
+tipports=$(nmap $tip -p- -T4 -oX - | xmlstarlet sel -t -v '//port[state/@state="open"]/@portid' -nl | paste -s -d, -)
+echo Ports: $tipports
+nmap $tip -p$tipports -T4 -sV -sC -oN $tip_enumerate.nmap
+# cat $rip_enumerate.nmap
+eox
+chmod +x /root/enumerate.sh
+echo "Installed enumerate script"
 
-shellandfiles(){
-	#Install zsh and ohmyzsh
-	sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" "" --unattended
-	zsh=$(which zsh)
-	chsh -s "$zsh"
-	export SHELL="$zsh"
-	debugstop "Installed oh my zsh"
+# Add extras to .bashrc
+cat >> /root/.bashrc << 'eos' # single quotes prevent the need to escape anything
+#### Custom ####
 
-	#install my theme
-	cp /root/KaliJumpStart/hatanomyon.zsh-theme /root/.oh-my-zsh/themes/
-	sed 's,ZSH_THEME=[^;]*,ZSH_THEME=\"hatanomyon\",' -i ~/.zshrc
-	#. ~/.zshrc
-	debugstop "Installed personal shell theme"
-	
-	#also remove transparency from terminal
-	#sed 's,ApplicationTransparency=.*$,ApplicationTransparency=0,' -i /root/.config/qterminal.org/qterminal.ini
-	
-	#show hidden files
-	xfconf-query -c thunar -p /last-show-hidden -s true --create -t bool
-}
-
-zshrcadditions(){
-cat >> /root/.zshrc << 'eos' # single quotes prevent the need to escape anything
+PS1='╭──{\[\e[91m\]\u@\h\[\e[0m\]} \[\e[38;5;81;3m\]\w\[\e[0m\] \n╰\[\e[38;5;76m\][\D{%d/%m/%y} \t]\[\e[0m\] \$ '
 
 alias wanip4='dig @resolver4.opendns.com myip.opendns.com +short -4'
+alias enumerate='/root/enumerate.sh'
 
-# smart_script will continuously log the input and output of the terminal into a logfile located in ~/terminal_logs
-# Original credit to HuskyHacks
-
-logging_script(){
-    # if there's no SCRIPT_LOG_FILE exported yet
-    if [ -z "$SCRIPT_LOG_FILE" ]; then
-        # make folder paths
-        logdirparent=~/terminal_logs
-        logdirraw=raw/$(date +%F)
-        logdir=$logdirparent/$logdirraw
-        logfile=$logdir/$(date +%F_%T).$$.rawlog
-        txtfile=$logdir/$(date +%F_%T).$$.txt
-        
-        # if no folder exist - make one
-        if [ ! -d $logdir ]; then
-            mkdir -p $logdir
-        fi
-        export SCRIPT_LOG_FILE=$logfile
-        export SCRIPT_LOG_PARENT_FOLDER=$logdirparent
-        export TXTFILE=$txtfile
-        
-        # quiet output if no args are passed
-        if [ ! -z "$1" ]; then
-            script -f $logfile
-            cat $logfile | perl -pe 's/\\e([^\\[\\]]|\\[.*?[a-zA-Z]|\\].*?\\a)//g' | col -b > $txtfile
-        else
-            script -f -q $logfile
-            cat $logfile | perl -pe 's/\\e([^\\[\\]]|\\[.*?[a-zA-Z]|\\].*?\\a)//g' | col -b > $txtfile
-        fi
-        exit
-    fi
-}
-# Start logging into new file
-alias startnewlog='unset SCRIPT_LOG_FILE && smart_script -v'
-
-# savelog manually saves the current terminal in/out into a logfile: 
-# Example: $ savelog logname
-savelog(){
-    # make folder path
-    manualdir=$SCRIPT_LOG_PARENT_FOLDER/manual
-    # if no folder exists - make one
-    if [ ! -d $manualdir ]; then
-        mkdir -p $manualdir
-    fi
-    # make log name
-    logname=${SCRIPT_LOG_FILE##*/}
-    logname=${logname%.*}
-    # add user logname if passed as argument
-    if [ ! -z $1 ]; then
-        logname=$logname'_'$1
-    fi
-    # make filepaths
-    txtfile=$manualdir/$logname'.txt'
-    rawfile=$manualdir/$logname'.rawlog'
-    # make .rawlog readable and save it to .txt file
-    cat $SCRIPT_LOG_FILE | perl -pe 's/\\e([^\\[\\]]|\\[.*?[a-zA-Z]|\\].*?\\a)//g' | col -b > $txtfile
-    # copy corresponding .rawfile
-    cp $SCRIPT_LOG_FILE $rawfile
-    printf '[+] Saved logs'
-    echo ""
-    printf '  \\\\-> '$txtfile''
-    echo ""
-    printf '  \\\\-> '$rawfile''
-}
-
+# target and ip setting - tip and $lip
 alias settgt='nano /etc/hosts'
 setlip() { lipif=${1:-eth0}; lip=$(ip -f inet addr show $lipif | sed -En -e 's/.*inet ([0-9.]+).*/\1/p'); echo "lip set to $lip";}
 
 
-# Run script at terminal initialization
-logging_script
+cd ~/Desktop
 
 # print banner
-print -P "%F{045}%}Available custom cmdlets: startnewlog, wanip4, settgt, setlip%{$reset_color%}"
-print -P "%F{045}%}Session being logged!%{$reset_color%}"
+print -P "%F{045}%}Available custom cmdlets: wanip4, settgt%{$reset_color%}"
 print -P "%F{045}%}External IP: $(wanip4)%{$reset_color%}"
-
 eos
-}
+echo "Added extras to bash"
 
-bg(){
-	curl https://i.imgur.com/6cdsm1n.png > ~/bg.png
-	xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitorVirtual1/workspace0/last-image -s ~/bg.png
-	debugstop "Installed bg"
-}
 
-toolsonly(){
-	toolinstall
-}
+# Remove power saving options
+xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/dpms-enabled -s false --create -t bool # disable display power management
+xfconf-query -c xfce4-power-manager -p /xfce4-screensaver/saver/enabled -s false --create -t bool # disable display power management
+echo "Set power options"
 
-configsonly(){
-	pimpmykali
-	rootautologin
-	screenandpower
-	additionalaptpackages
-	shellandfiles
-	zshrcadditions
-	bg
-	upgradeautoremove
-}
+# Install background image
+curl https://i.imgur.com/6cdsm1n.png --output ~/bg.png
+xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitorVirtual1/workspace0/last-image -s ~/bg.png
+echo "Installed bg"
 
-fullinstall(){
-	configsonly
-	toolinstall
-	debugstop "Done! Reboot for full effect."
-}
-
-mainf(){
-	cd /root
-	
-	title="KaliJumpStarter"
-	prompt="Pick an option:"
-	options=("Full" "Configs only" "Tools only")
-	
-	echo "$title"
-	PS3="$prompt "
-	select opt in "${options[@]}" "Quit"; do 
-	    case "$REPLY" in
-	    1) echo "You picked $opt"
-	    fullinstall
-	    break;;
-	    2) echo "You picked $opt"
-	    configsonly
-            break;;
-	    3) echo "You picked $opt"
-	    toolsonly
-            break;;
-	    $((${#options[@]}+1))) echo "Goodbye!"; break;;
-	    *) echo "Invalid option. Try another one.";continue;;
-	    esac
-	done
-	
-	prompt="Delete KJS:"
-	options=("Yes" "No")
-
-	echo "$title"
-	PS3="$prompt "
-	select opt in "${options[@]}" "Quit"; do 
-	    case "$REPLY" in
-	    1) echo "You picked $opt"
-	    rm -rf /root/KaliJumpStart/
-		echo "Goodbye!"
-	    break;;
-	    2) echo "Goodbye!"
-            break;;
-	    $((${#options[@]}+1))) echo "Goodbye!"; break;;
-	    *) echo "Invalid option. Try another one.";continue;;
-	    esac
-	done
-}
-
-mainf
