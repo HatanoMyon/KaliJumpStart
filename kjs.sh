@@ -49,10 +49,13 @@ xfconf-query -c thunar -p /last-show-hidden -s true --create -t bool
 echo "Set hidden files to be shown"
 
 # Install PDTM
-go install -v github.com/projectdiscovery/pdtm/cmd/pdtm@latest
+go install github.com/projectdiscovery/pdtm/cmd/pdtm@latest
 pdtm -install-all
 echo "Installed PDTM"
 
+# Install FFUF
+go install github.com/ffuf/ffuf/v2@latest
+echo "Installed FFUF"
 
 # Create net interface monitor script
 cat > /root/ipmon_genmon.sh << 'eox'
