@@ -15,7 +15,7 @@ echo "Installed upgrades"
 apt install debsums apt-listbugs apt-listchanges needrestart -y
 echo "Installed apt improvements"
 
-apt install golang-go peass powercat windows-privesc-check  -y
+apt install xmlstarlet golang-go peass powercat windows-privesc-check  -y
 echo "Installed extra repos"
 
 # Change shell to bash
