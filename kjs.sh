@@ -108,7 +108,7 @@ echo "Added extras to bash"
 
 # Remove power saving options
 xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/dpms-enabled -s false --create -t bool # disable display power management
-xfconf-query -c xfce4-power-manager -p /xfce4-screensaver/saver/enabled -s false --create -t bool # disable display power management
+xfconf-query -c xfce4-screensaver -p /saver/enabled -s false --create -t bool # disable display power management
 echo "Set power options"
 
 # Install background image
