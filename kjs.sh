@@ -96,8 +96,8 @@ setlip() { lipif=${1:-eth0}; lip=$(ip -f inet addr show $lipif | sed -En -e 's/.
 cd ~/Desktop
 
 # print banner
-print -P "%F{045}%}Available custom cmdlets: wanip4, settgt%{$reset_color%}"
-print -P "%F{045}%}External IP: $(wanip4)%{$reset_color%}"
+echo "Available custom cmdlets: wanip4, settgt, setlip"
+echo "External IP: $(wanip4)"
 eos
 echo "Added extras to bash"
 
